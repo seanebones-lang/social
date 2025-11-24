@@ -43,11 +43,20 @@ export default function OnboardingPage() {
 
   const createProfileMutation = trpc.profiles.create.useMutation();
   const createInvitesMutation = trpc.profiles.createPlatformInvites.useMutation();
+  const { data: userSession } = trpc.auth.getSession.useQuery();
   const { data: connectionStatus, refetch: refetchStatus } =
     trpc.profiles.checkConnectionStatus.useQuery(
-      { profileId },
+      { profileId: profileId || "" },
       { enabled: !!profileId && isPolling, refetchInterval: 3000 }
     );
+
+  // Auto-load existing profile if user already has one
+  useEffect(() => {
+    if (userSession?.lateProfileId && !profileId) {
+      setProfileId(userSession.lateProfileId);
+      setStep("connect");
+    }
+  }, [userSession, profileId]);
 
   useEffect(() => {
     if (connectionStatus) {
