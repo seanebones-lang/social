@@ -75,6 +75,7 @@ export default function OnboardingPage() {
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSession]);
 
   useEffect(() => {

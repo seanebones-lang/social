@@ -66,4 +66,3 @@ export const STRIPE_ADDONS = {
     priceId: "price_1SX2UUCHzMTnpYNoKgH11ZCc",
   },
 };
-
