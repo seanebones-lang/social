@@ -52,7 +52,8 @@ export default function OnboardingPage() {
 
   // Auto-load existing profile if user already has one
   useEffect(() => {
-    if (userSession?.lateProfileId && !profileId) {
+    if (userSession?.lateProfileId && !profileId && step === "create") {
+      console.log("Auto-loading existing profile:", userSession.lateProfileId);
       setProfileId(userSession.lateProfileId);
       setStep("connect");
       setIsPolling(true);
@@ -62,12 +63,16 @@ export default function OnboardingPage() {
         { profileId: userSession.lateProfileId },
         {
           onSuccess: (invites) => {
+            console.log("Loaded existing invites:", invites);
             setInvites(invites);
+          },
+          onError: (error) => {
+            console.error("Failed to load invites:", error);
           },
         }
       );
     }
-  }, [userSession, profileId]);
+  }, [userSession, profileId, step]);
 
   useEffect(() => {
     if (connectionStatus) {
@@ -81,22 +86,28 @@ export default function OnboardingPage() {
   const handleCreateProfile = async () => {
     try {
       const uniqueName = `${session?.user?.name || "User"}'s Profile ${Date.now()}`;
+      
+      console.log("Creating profile with name:", uniqueName);
       const profile = await createProfileMutation.mutateAsync({
         name: uniqueName,
       });
 
+      console.log("Profile created:", profile);
       setProfileId(profile.id);
 
+      console.log("Creating platform invites for profileId:", profile.id);
       const platformInvites = await createInvitesMutation.mutateAsync({
         profileId: profile.id,
       });
 
+      console.log("Platform invites created:", platformInvites);
       setInvites(platformInvites);
       setStep("connect");
       setIsPolling(true);
 
       toast.success("Profile created! Now connect your platforms.");
     } catch (error: any) {
+      console.error("Profile creation error:", error);
       toast.error(error.message || "Failed to create profile");
     }
   };
