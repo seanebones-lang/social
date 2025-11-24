@@ -95,17 +95,13 @@ export default function OnboardingPage() {
   };
 
   const handleComplete = () => {
-    if (connectedPlatforms.length === 0) {
-      toast.error("Please connect at least one platform");
-      return;
-    }
-
     toast.success("Onboarding complete!");
-    router.push("/dashboard");
+    router.push("/dashboard" as any);
   };
 
   const handleSkip = () => {
-    router.push("/dashboard");
+    toast.info("You can connect platforms later from Settings");
+    router.push("/dashboard" as any);
   };
 
   return (
@@ -160,10 +156,17 @@ export default function OnboardingPage() {
             <CardHeader>
               <CardTitle>Connect Your Platforms</CardTitle>
               <CardDescription>
-                Click on each platform to authorize Pulse Social to post on your behalf
+                Click on each platform to authorize Pulse Social to post on your behalf.
+                Each will open in a new tab where you&apos;ll log in and grant permissions.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-900">
+                  <strong>How to connect:</strong> Click a platform below → Log in to that platform → 
+                  Authorize Pulse Social → Return here (the status will update automatically)
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {PLATFORMS.map((platform) => {
                   const invite = invites.find((i) => i.platform === platform.id);
