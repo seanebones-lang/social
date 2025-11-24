@@ -58,21 +58,24 @@ export default function OnboardingPage() {
       setStep("connect");
       setIsPolling(true);
       
-      // Fetch existing invites
-      createInvitesMutation.mutate(
-        { profileId: userSession.lateProfileId },
-        {
-          onSuccess: (invites) => {
-            console.log("Loaded existing invites:", invites);
-            setInvites(invites);
-          },
-          onError: (error) => {
-            console.error("Failed to load invites:", error);
-          },
-        }
-      );
+      // Fetch existing invites - only if we have a valid profileId
+      if (userSession.lateProfileId) {
+        createInvitesMutation.mutate(
+          { profileId: userSession.lateProfileId },
+          {
+            onSuccess: (invites) => {
+              console.log("Loaded existing invites:", invites);
+              setInvites(invites);
+            },
+            onError: (error) => {
+              console.error("Failed to load invites:", error);
+              // Don't block the user, just log the error
+            },
+          }
+        );
+      }
     }
-  }, [userSession, profileId, step]);
+  }, [userSession]);
 
   useEffect(() => {
     if (connectionStatus) {
