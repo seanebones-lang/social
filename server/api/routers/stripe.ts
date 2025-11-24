@@ -24,19 +24,27 @@ export const stripeRouter = createTRPCRouter({
       // Create or get Stripe customer
       let customerId = user.stripeCustomerId;
       if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user.email!,
-          name: user.name || undefined,
-          metadata: {
-            userId: user.id,
-          },
-        });
-        customerId = customer.id;
+        try {
+          const customer = await stripe.customers.create({
+            email: user.email!,
+            name: user.name || undefined,
+            metadata: {
+              userId: user.id,
+            },
+          });
+          customerId = customer.id;
 
-        await ctx.db.user.update({
-          where: { id: user.id },
-          data: { stripeCustomerId: customerId },
-        });
+          await ctx.db.user.update({
+            where: { id: user.id },
+            data: { stripeCustomerId: customerId },
+          });
+        } catch (error: any) {
+          console.error("Stripe customer creation failed:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create Stripe customer. Please try again.",
+          });
+        }
       }
 
       // Build line items
@@ -58,7 +66,9 @@ export const stripeRouter = createTRPCRouter({
       }
 
       // Create checkout session
-      const session = await stripe.checkout.sessions.create({
+      let session;
+      try {
+        session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
         payment_method_types: ["card"],
@@ -78,6 +88,13 @@ export const stripeRouter = createTRPCRouter({
           plan: input.plan,
         },
       });
+      } catch (error: any) {
+        console.error("Stripe checkout session creation failed:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create checkout session. Please try again.",
+        });
+      }
 
       return {
         sessionId: session.id,
