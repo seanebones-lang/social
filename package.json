@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test:key": "tsx scripts/test-late-key.ts",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "next": "^15.1.0",
