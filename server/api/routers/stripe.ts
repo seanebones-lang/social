@@ -21,6 +21,16 @@ export const stripeRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
+      // Validate Stripe configuration
+      if (!process.env.STRIPE_SECRET_KEY || 
+          process.env.STRIPE_SECRET_KEY.includes("REPLACE_WITH") || 
+          process.env.STRIPE_SECRET_KEY === "sk_test_placeholder") {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Stripe is not configured. Please contact support.",
+        });
+      }
+
       // Create or get Stripe customer
       let customerId = user.stripeCustomerId;
       if (!customerId) {
@@ -40,9 +50,24 @@ export const stripeRouter = createTRPCRouter({
           });
         } catch (error: any) {
           console.error("Stripe customer creation failed:", error);
+          console.error("Error details:", {
+            message: error.message,
+            type: error.type,
+            code: error.code,
+            statusCode: error.statusCode,
+          });
+          
+          // Provide more specific error messages
+          let errorMessage = "Failed to create Stripe customer. Please try again.";
+          if (error.type === "StripeAuthenticationError") {
+            errorMessage = "Stripe authentication failed. Please check your API keys.";
+          } else if (error.type === "StripeInvalidRequestError") {
+            errorMessage = `Invalid request to Stripe: ${error.message}`;
+          }
+          
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create Stripe customer. Please try again.",
+            message: errorMessage,
           });
         }
       }

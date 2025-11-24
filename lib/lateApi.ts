@@ -119,17 +119,34 @@ class LateApiClient {
       ...options.headers,
     };
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    console.log(`Late API Request: ${options.method || 'GET'} ${url}`);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Late API Error: ${response.status} - ${error}`);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = await response.text() || errorMessage;
+        }
+        
+        console.error(`Late API Error: ${response.status} - ${errorMessage}`);
+        throw new Error(`Late API Error (${response.status}): ${errorMessage}`);
+      }
+
+      const data = await response.json();
+      console.log(`Late API Response: Success`);
+      return data;
+    } catch (error: any) {
+      console.error(`Late API Request Failed:`, error.message);
+      throw error;
     }
-
-    return response.json();
   }
 
   // Profile Management

@@ -1,5 +1,11 @@
 import Stripe from "stripe";
 
+if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes("REPLACE_WITH") || process.env.STRIPE_SECRET_KEY === "sk_test_placeholder") {
+  console.error("⚠️  STRIPE_SECRET_KEY is not configured properly!");
+  console.error("Please set your actual Stripe API key in .env.local");
+  console.error("Get your keys from: https://dashboard.stripe.com/test/apikeys");
+}
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
   apiVersion: "2025-02-24.acacia",
   typescript: true,

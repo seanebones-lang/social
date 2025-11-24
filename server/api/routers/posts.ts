@@ -14,8 +14,8 @@ export const postsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        content: z.string().min(1),
-        platforms: z.array(z.string()),
+        content: z.string().min(1, "Content is required"),
+        platforms: z.array(z.string()).min(1, "At least one platform is required"),
         scheduledAt: z.string().optional(),
         useQueue: z.boolean().default(false),
         mediaUrls: z.array(z.string()).optional(),
@@ -23,13 +23,19 @@ export const postsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-      });
+      try {
+        console.log("Creating post for user:", ctx.session.user.id);
+        console.log("Platforms:", input.platforms);
+        
+        const user = await ctx.db.user.findUnique({
+          where: { id: ctx.session.user.id },
+        });
 
-      if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+        if (!user) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        }
+
+        console.log("User found. Plan:", user.plan, "Posts used:", user.postsUsed);
 
       // Check if user is locked
       if (user.isLocked) {
@@ -72,26 +78,48 @@ export const postsRouter = createTRPCRouter({
         });
       }
 
+      console.log("Late profile ID:", user.lateProfileId);
+
       // Get queue slot if requested
       let scheduledAt = input.scheduledAt;
       if (input.useQueue) {
-        const queueSlot = await lateApi.getNextQueueSlot(user.lateProfileId);
-        scheduledAt = queueSlot.nextSlot;
+        try {
+          const queueSlot = await lateApi.getNextQueueSlot(user.lateProfileId);
+          scheduledAt = queueSlot.nextSlot;
+          console.log("Queue slot obtained:", scheduledAt);
+        } catch (error: any) {
+          console.error("Failed to get queue slot:", error.message);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to get queue slot. Please try scheduling manually.",
+          });
+        }
       }
 
       // Create post via Late API
-      const latePost = await lateApi.createPost({
-        profileId: user.lateProfileId,
-        content: input.content,
-        platforms: input.platforms,
-        scheduledAt,
-        mediaItems: input.mediaUrls?.map((url) => ({
-          url,
-          type: url.match(/\.(mp4|mov|avi)$/i) ? "video" : "image",
-        })),
-        platformSpecificData: input.platformSpecificData,
-        queuedFromProfile: input.useQueue ? user.lateProfileId : undefined,
-      });
+      console.log("Creating post via Late API...");
+      let latePost;
+      try {
+        latePost = await lateApi.createPost({
+          profileId: user.lateProfileId,
+          content: input.content,
+          platforms: input.platforms,
+          scheduledAt,
+          mediaItems: input.mediaUrls?.map((url) => ({
+            url,
+            type: url.match(/\.(mp4|mov|avi)$/i) ? "video" : "image",
+          })),
+          platformSpecificData: input.platformSpecificData,
+          queuedFromProfile: input.useQueue ? user.lateProfileId : undefined,
+        });
+        console.log("Late post created:", latePost.id);
+      } catch (error: any) {
+        console.error("Late API post creation failed:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to create post: ${error.message}`,
+        });
+      }
 
       // Log post in database
       const postLog = await ctx.db.postLog.create({
@@ -116,10 +144,24 @@ export const postsRouter = createTRPCRouter({
         },
       });
 
+      console.log("Post created successfully. Post log ID:", postLog.id);
+
       return {
         postLog,
         latePost,
       };
+    } catch (error: any) {
+      console.error("Post creation error:", error);
+      // Re-throw TRPC errors as-is
+      if (error.code) {
+        throw error;
+      }
+      // Wrap other errors
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: error.message || "Failed to create post",
+      });
+    }
     }),
 
   getHistory: protectedProcedure
