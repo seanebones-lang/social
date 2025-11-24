@@ -86,6 +86,13 @@ export default function DashboardPage() {
     setIsUploading(true);
 
     try {
+      // Check if Blob token is configured
+      if (!process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN || process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN === "placeholder_token") {
+        toast.error("File uploads not configured. Contact support to enable media uploads.");
+        setIsUploading(false);
+        return;
+      }
+
       const uploadPromises = Array.from(files).map(async (file) => {
         const blob = await put(file.name, file, {
           access: "public",
@@ -98,7 +105,7 @@ export default function DashboardPage() {
       setUploadedFiles((prev) => [...prev, ...urls]);
       toast.success(`Uploaded ${files.length} file(s)`);
     } catch (error) {
-      toast.error("Failed to upload files");
+      toast.error("Failed to upload files. You can still post without media.");
       console.error(error);
     } finally {
       setIsUploading(false);
