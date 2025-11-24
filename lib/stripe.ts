@@ -9,7 +9,7 @@ export const STRIPE_PLANS = {
   essentials: {
     name: "Essentials",
     price: 15,
-    priceId: "price_essentials_monthly",
+    priceId: "prod_TU04fwafqq0JGD",
     features: ["2 profiles", "5 platforms", "100 posts/month"],
     limits: {
       profiles: 2,
@@ -20,7 +20,7 @@ export const STRIPE_PLANS = {
   pro: {
     name: "Pro",
     price: 39,
-    priceId: "price_pro_monthly",
+    priceId: "prod_TU0BvgfiYUmqaK",
     features: ["10 profiles", "All platforms", "500 posts/month"],
     limits: {
       profiles: 10,
@@ -31,7 +31,7 @@ export const STRIPE_PLANS = {
   business: {
     name: "Business",
     price: 99,
-    priceId: "price_business_monthly",
+    priceId: "prod_TU0CxvbgbzpjUr",
     features: ["50 profiles", "All platforms", "Unlimited posts"],
     limits: {
       profiles: 50,
