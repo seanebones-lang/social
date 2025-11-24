@@ -55,6 +55,17 @@ export default function OnboardingPage() {
     if (userSession?.lateProfileId && !profileId) {
       setProfileId(userSession.lateProfileId);
       setStep("connect");
+      setIsPolling(true);
+      
+      // Fetch existing invites
+      createInvitesMutation.mutate(
+        { profileId: userSession.lateProfileId },
+        {
+          onSuccess: (invites) => {
+            setInvites(invites);
+          },
+        }
+      );
     }
   }, [userSession, profileId]);
 
