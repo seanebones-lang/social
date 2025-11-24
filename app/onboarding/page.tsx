@@ -46,7 +46,7 @@ export default function OnboardingPage() {
   const { data: userSession } = trpc.auth.getSession.useQuery();
   const { data: connectionStatus, refetch: refetchStatus } =
     trpc.profiles.checkConnectionStatus.useQuery(
-      { profileId: profileId || "" },
+      { profileId: profileId || undefined },
       { enabled: !!profileId && isPolling, refetchInterval: 3000 }
     );
 

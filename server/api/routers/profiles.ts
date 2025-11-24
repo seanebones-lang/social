@@ -57,8 +57,15 @@ export const profilesRouter = createTRPCRouter({
     }),
 
   checkConnectionStatus: protectedProcedure
-    .input(z.object({ profileId: z.string() }))
+    .input(z.object({ profileId: z.string().optional() }))
     .query(async ({ input }) => {
+      if (!input.profileId) {
+        return PLATFORMS.map((platform) => ({
+          platform,
+          connected: false,
+        }));
+      }
+
       const accounts = await lateApi.getAccounts(input.profileId);
 
       const status = PLATFORMS.map((platform) => ({
