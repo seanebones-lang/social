@@ -9,7 +9,7 @@ export const STRIPE_PLANS = {
   essentials: {
     name: "Essentials",
     price: 15,
-    priceId: "prod_TU04fwafqq0JGD",
+    priceId: "price_1SX24aCHzMTnpYNoD0i7ui4w",
     features: ["2 profiles", "5 platforms", "100 posts/month"],
     limits: {
       profiles: 2,
@@ -20,7 +20,7 @@ export const STRIPE_PLANS = {
   pro: {
     name: "Pro",
     price: 39,
-    priceId: "prod_TU0BvgfiYUmqaK",
+    priceId: "price_1SX2AoCHzMTnpYNoBCRFGtVE",
     features: ["10 profiles", "All platforms", "500 posts/month"],
     limits: {
       profiles: 10,
@@ -31,7 +31,7 @@ export const STRIPE_PLANS = {
   business: {
     name: "Business",
     price: 99,
-    priceId: "prod_TU0CxvbgbzpjUr",
+    priceId: "price_1SX2BpCHzMTnpYNoQSDAM3sg",
     features: ["50 profiles", "All platforms", "Unlimited posts"],
     limits: {
       profiles: 50,
@@ -45,17 +45,17 @@ export const STRIPE_ADDONS = {
   reddit: {
     name: "Reddit Virality Pack",
     price: 19,
-    priceId: "price_addon_reddit",
+    priceId: "price_1SX2SzCHzMTnpYNoDBfMAlP2",
   },
   linkedin: {
     name: "LinkedIn Pro Suite",
     price: 19,
-    priceId: "price_addon_linkedin",
+    priceId: "price_1SX2TnCHzMTnpYNo3QSWBG5w",
   },
   analytics: {
     name: "Analytics Pro",
     price: 25,
-    priceId: "price_addon_analytics",
+    priceId: "price_1SX2UUCHzMTnpYNoKgH11ZCc",
   },
 };
 
