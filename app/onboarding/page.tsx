@@ -69,8 +69,9 @@ export default function OnboardingPage() {
 
   const handleCreateProfile = async () => {
     try {
+      const uniqueName = `${session?.user?.name || "User"}'s Profile ${Date.now()}`;
       const profile = await createProfileMutation.mutateAsync({
-        name: `${session?.user?.name}'s Profile` || "My Profile",
+        name: uniqueName,
       });
 
       setProfileId(profile.id);
